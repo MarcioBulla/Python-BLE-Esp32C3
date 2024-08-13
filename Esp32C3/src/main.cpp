@@ -1,5 +1,5 @@
-#include "HWCDC.h"
 #include "NimBLEDevice.h"
+#include "esp32-hal-gpio.h"
 #include <Arduino.h>
 
 #define LED_PIN 8
@@ -29,12 +29,12 @@ class MyFirstCharacteristicCallback : public NimBLECharacteristicCallbacks {
 
     if (value == "ON") {
       digitalWrite(LED_PIN, LOW);
-      pCharacteristic->setValue("ON");
     } else if (value == "OFF") {
       digitalWrite(LED_PIN, HIGH);
-      pCharacteristic->setValue("OFF");
     } else {
       Serial.println("Unknown Value Received");
+      std::string state = (digitalRead(LED_PIN) == LOW) ? "ON" : "OFF";
+      pCharacteristic->setValue(state);
     }
   }
 
@@ -63,7 +63,7 @@ void setup(void) {
   pCharacteristic->setCallbacks(new MyFirstCharacteristicCallback());
 
   pService->start();
-  pCharacteristic->setValue("Hello BLE");
+  pCharacteristic->setValue("OFF");
 
   NimBLEAdvertising *pAdvertising = NimBLEDevice::getAdvertising();
   pAdvertising->addServiceUUID("6de1445f-9e7c-494f-944b-1a2259c0fc3b");
